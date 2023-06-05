@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+</head>
+<body>
+    <ul id="messages"></ul>
+
+    <form action="" id="form">
+        <input type="text" id="input" autocomplete="off" placeholder="Chat Message"/>
+    <button>Send</button>
+    </form>
+    
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const messages = document.getElementById('messages');
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const userID = Date.now();
+
+        let name= prompt("Enter your username");
+
+
+        form.addEventListener("submit", (e) => { // input handler
+            e.preventDefault();
+            if(input.value) {
+                socket.emit("newuser", name);
+                socket.emit("chat message", {
+                    name: name,
+                    msg: input.value,
+                    user: userID
+                })
+                input.value = "" // empty input value after emit to socket
+            }
+        })
+
+        socket.on("chat message", (msgObject) => { // tricker went socket emit "chat message"
+            const message = document.createElement('li');
+            const messageItem = document.createElement('span');
+
+            const peopleInRoom = document.getElementById('chatroom');
+
+            messageItem.textContent = `${msgObject.name}:  ${msgObject.msg}`;
+
+            if(msgObject.user === userID) {
+                message.classList.add('right'); 
+            }
+            message.appendChild(messageItem);
+            messages.appendChild(message);
+        })
+        //<ul>
+        //  <li>
+        //      <span>message</span>
+        //  </li>
+        //</ul>
+    </script>
+</body>
+</html>
